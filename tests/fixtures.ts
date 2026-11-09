@@ -16,13 +16,13 @@ export const products = [
 export async function mockApi(
   page: Page,
   role: "guest" | "user" | "admin" = "guest",
+  session = { role },
 ) {
-  let accountRole = role;
   const profile = () => ({
     id: "00000000-0000-4000-8000-000000000100",
     name: "Fixture Visitor",
     email: "fixture@example.test",
-    roles: accountRole === "admin" ? "ROLE_ADMIN" : "ROLE_USER",
+    roles: session.role === "admin" ? "ROLE_ADMIN" : "ROLE_USER",
     enabled: true,
   });
   await page.route("**/api/**", async (route) => {
@@ -35,12 +35,16 @@ export async function mockApi(
         json: { token: "fixture-csrf", headerName: "X-XSRF-TOKEN" },
       });
     if (path === "/session/login") {
-      accountRole = "user";
+      session.role = "user";
+      return route.fulfill({ status: 204 });
+    }
+    if (path === "/session" && request.method() === "DELETE") {
+      session.role = "guest";
       return route.fulfill({ status: 204 });
     }
     if (path === "/session")
       return route.fulfill(
-        accountRole === "guest" ? { status: 401 } : { json: profile() },
+        session.role === "guest" ? { status: 401 } : { json: profile() },
       );
     if (path === "/products" && request.method() === "GET")
       return route.fulfill({ json: products });

@@ -1,5 +1,30 @@
 import { test, expect } from "@playwright/test";
 import { mockApi } from "./fixtures";
+test("signing out clears the private profile in another open tab", async ({
+  page,
+  context,
+}) => {
+  const session: { role: "guest" | "user" | "admin" } = { role: "user" };
+  await mockApi(page, "user", session);
+  const other = await context.newPage();
+  await mockApi(other, "user", session);
+  await page.goto("/store/account/");
+  await other.goto("/store/account/");
+  await expect(
+    page.getByText("fixture@example.test", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    other.getByText("fixture@example.test", { exact: true }),
+  ).toBeVisible();
+  await other.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Sign in to continue.", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("fixture@example.test", { exact: true }),
+  ).toHaveCount(0);
+  await other.close();
+});
 test("search and cart persist across navigation", async ({ page }) => {
   await mockApi(page);
   await page.goto("/store/");
