@@ -6,6 +6,8 @@ test("catalog image URLs render with alternative text and recover from a failed 
   page,
 }) => {
   await mockApi(page);
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
   let broken = false;
   const png = await readFile("public/brand.png");
   const image = {
@@ -40,4 +42,5 @@ test("catalog image URLs render with alternative text and recover from a failed 
   await expect(
     page.getByRole("img", { name: image.alt, exact: true }),
   ).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
 });
