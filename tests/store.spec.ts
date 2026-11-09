@@ -34,7 +34,9 @@ test("signed-in checkout creates a demo order without payment fields", async ({
   expect((await request).postDataJSON()).toEqual({
     items: [{ idProduct: "00000000-0000-4000-8000-000000000001", quantity: 1 }],
   });
-  await expect(page.getByRole("alert")).toContainText("No payment was taken");
+  await expect(
+    page.getByRole("alert").filter({ hasText: "No payment was taken" }),
+  ).toContainText("No payment was taken");
   await expect(page.getByLabel(/card number/i)).toHaveCount(0);
 });
 test("invalid login input displays accessible errors", async ({ page }) => {
