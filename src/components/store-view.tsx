@@ -12,6 +12,7 @@ import { CartProvider, useCart } from "@/components/cart";
 import { useSession } from "@/components/session";
 import { Empty, Failure, Loading } from "@/components/feedback";
 import { ProductCard } from "@/components/product-card";
+import { ProductVisual } from "@/components/product-visual";
 import { api, date, money } from "@/lib/api";
 import {
   accountSchema,
@@ -247,10 +248,7 @@ function ProductDetail() {
       </p>
       <div className="split">
         <div className="product-tile" style={{ minHeight: 320 }}>
-          <span aria-hidden="true">
-            {product.data.name.slice(0, 2).toUpperCase()}
-          </span>
-          <small>Product image unavailable</small>
+          <ProductVisual product={product.data} priority />
         </div>
         <div>
           <Heading label="DEMO PRODUCT" title={product.data.name} />
